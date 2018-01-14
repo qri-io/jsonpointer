@@ -21,6 +21,7 @@ import (
 // If a url string, Parse will use the URL's fragment component
 // (the bit after the '#' symbol)
 func Parse(str string) (Pointer, error) {
+	// fast paths that skip url parse step
 	if len(str) == 0 || str == "#" {
 		return Pointer{}, nil
 	} else if str[0] == '/' {
@@ -42,12 +43,14 @@ func Parse(str string) (Pointer, error) {
 // escaped         = "~" ( "0" / "1" )
 //   ; representing '~' and '/', respectively
 func parse(str string) (Pointer, error) {
-	if len(str) > 0 {
-		if str[0] != '/' {
-			return nil, fmt.Errorf("non-empty references must begin with a '/' character")
-		}
-		str = str[1:]
+	if len(str) == 0 {
+		return Pointer{}, nil
 	}
+
+	if str[0] != '/' {
+		return nil, fmt.Errorf("non-empty references must begin with a '/' character")
+	}
+	str = str[1:]
 
 	toks := strings.Split(str, separator)
 	for i, t := range toks {

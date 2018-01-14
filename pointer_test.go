@@ -60,6 +60,8 @@ func TestParse(t *testing.T) {
 
 		{"://", "", "parse ://: missing protocol scheme"},
 		{"#7", "", "non-empty references must begin with a '/' character"},
+		{"", "", ""},
+		{"https://example.com#", "", ""},
 	}
 
 	for i, c := range cases {
