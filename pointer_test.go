@@ -170,3 +170,18 @@ func BenchmarkEval(b *testing.B) {
 
 	}
 }
+
+func TestEscapeToken(t *testing.T) {
+	cases := []struct {
+		input  string
+		output string
+	}{
+		{"/abc~1/~/0/~0/", "/abc~1/~/0/~0/"},
+	}
+	for i, c := range cases {
+		got := unescapeToken(escapeToken(c.input))
+		if got != c.output {
+			t.Errorf("case %d result mismatch.  expected: '%s', got: '%s'", i, c.output, got)
+		}
+	}
+}
