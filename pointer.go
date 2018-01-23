@@ -127,6 +127,6 @@ func unescapeToken(tok string) string {
 }
 
 func escapeToken(tok string) string {
-	tok = strings.Replace(tok, escapedTilde, escapedTilde, -1)
+	tok = strings.Replace(tok, tilde, escapedTilde, -1)
 	return strings.Replace(tok, separator, escapedSeparator, -1)
 }
