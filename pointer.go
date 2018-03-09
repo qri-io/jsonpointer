@@ -86,6 +86,24 @@ func (p Pointer) Eval(data interface{}) (result interface{}, err error) {
 	return
 }
 
+// Descendant returns a new pointer to a descendant of the current pointer
+// parsing the input path into components
+func (p Pointer) Descendant(path string) (Pointer, error) {
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+	dpath, err := parse(path)
+	if err != nil {
+		return p, err
+	}
+
+	if p.String() == "/" {
+		return dpath, nil
+	}
+
+	return append(p, dpath...), nil
+}
+
 // Evaluation of each reference token begins by decoding any escaped
 // character sequence.  This is performed by first transforming any
 // occurrence of the sequence '~1' to '/', and then transforming any

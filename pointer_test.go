@@ -56,7 +56,9 @@ func TestParse(t *testing.T) {
 		parsed string
 		err    string
 	}{
+		{"#/", "/", ""},
 		{"#/foo", "/foo", ""},
+		{"#/foo/", "/foo/", ""},
 
 		{"://", "", "parse ://: missing protocol scheme"},
 		{"#7", "", "non-empty references must begin with a '/' character"},
@@ -143,6 +145,40 @@ func TestEval(t *testing.T) {
 
 		if !reflect.DeepEqual(c.expect, got) {
 			t.Errorf("case %d result mismatch. expected: %v, got: %v", i, c.expect, got)
+			continue
+		}
+	}
+}
+
+func TestDescendent(t *testing.T) {
+	cases := []struct {
+		parent string
+		path   string
+		parsed string
+		err    string
+	}{
+		{"#/", "0", "/0", ""},
+		{"/0", "0", "/0/0", ""},
+		{"/foo", "0", "/foo/0", ""},
+		{"/foo", "0", "/foo/0", ""},
+		{"/foo/0", "0", "/foo/0/0", ""},
+	}
+
+	for i, c := range cases {
+		p, err := Parse(c.parent)
+		if err != nil {
+			t.Errorf("case %d error parsing parent: %s", i, err.Error())
+			continue
+		}
+
+		desc, err := p.Descendant(c.path)
+		if !(err == nil && c.err == "" || err != nil && err.Error() == c.err) {
+			t.Errorf("case %d error mismatch. expected: %s, got: %s", i, c.err, err)
+			continue
+		}
+
+		if desc.String() != c.parsed {
+			t.Errorf("case %d: expected: %s, got: %s", i, c.parsed, desc.String())
 			continue
 		}
 	}
