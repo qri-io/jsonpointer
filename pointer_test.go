@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -60,7 +61,7 @@ func TestParse(t *testing.T) {
 		{"#/foo", "/foo", ""},
 		{"#/foo/", "/foo/", ""},
 
-		{"://", "", "parse ://: missing protocol scheme"},
+		{"://", "", "missing protocol scheme"},
 		{"#7", "", "non-empty references must begin with a '/' character"},
 		{"", "", ""},
 		{"https://example.com#", "", ""},
@@ -68,7 +69,7 @@ func TestParse(t *testing.T) {
 
 	for i, c := range cases {
 		got, err := Parse(c.raw)
-		if !(err == nil && c.err == "" || err != nil && err.Error() == c.err) {
+		if !(err == nil && c.err == "" || err != nil && strings.Contains(err.Error(), c.err)) {
 			t.Errorf("case %d error mismatch. expected: '%s', got: '%s'", i, c.err, err)
 			continue
 		}
