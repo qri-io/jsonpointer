@@ -16,6 +16,8 @@ import (
 	"strings"
 )
 
+const defaultPointerAllocationSize = 32
+
 // Parse parses str into a Pointer structure.
 // str may be a pointer or a url string.
 // If a url string, Parse will use the URL's fragment component
@@ -33,6 +35,25 @@ func Parse(str string) (Pointer, error) {
 		return nil, err
 	}
 	return parse(u.Fragment)
+}
+
+// IsEmpty is a utility function to check if the Pointer
+// is empty / nil equivalent
+func (p Pointer) IsEmpty() bool {
+	return len(p) == 0
+}
+
+// Head returns the root of the Pointer
+func (p Pointer) Head() *string {
+	if len(p) == 0 {
+		return nil
+	}
+	return &p[0]
+}
+
+// Tail returns everything after the Pointer head
+func (p Pointer) Tail() Pointer {
+	return Pointer(p[1:])
 }
 
 // The ABNF syntax of a JSON Pointer is:
@@ -61,6 +82,12 @@ func parse(str string) (Pointer, error) {
 
 // Pointer represents a parsed JSON pointer
 type Pointer []string
+
+// NewPointer creates a Pointer with a pre-allocated block of memory
+// to avoid repeated slice expansions
+func NewPointer() Pointer {
+	return make([]string, 0, defaultPointerAllocationSize)
+}
 
 // String implements the stringer interface for Pointer,
 // giving the escaped string
@@ -102,6 +129,14 @@ func (p Pointer) Descendant(path string) (Pointer, error) {
 	}
 
 	return append(p, dpath...), nil
+}
+
+// RawDescendant extends the pointer with 1 or more path tokens
+// The function itself is unsafe as it doesnt fully parse the input
+// and assumes the user is directly managing the pointer
+// This allows for much faster pointer management
+func (p Pointer) RawDescendant(path ...string) Pointer {
+	return append(p, path...)
 }
 
 // Evaluation of each reference token begins by decoding any escaped
