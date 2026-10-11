@@ -155,7 +155,7 @@ func (p Pointer) evalToken(tok string, data interface{}) (interface{}, error) {
 		return ch[tok], nil
 	case []interface{}:
 		i, err := strconv.Atoi(tok)
-		if err != nil {
+		if err != nil || i < 0 || strconv.Itoa(i) != tok {
 			return nil, fmt.Errorf("invalid array index: %s", tok)
 		}
 		if i >= len(ch) {

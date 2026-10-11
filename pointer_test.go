@@ -222,3 +222,21 @@ func TestEscapeToken(t *testing.T) {
 		}
 	}
 }
+
+func TestEvalArrayIndexSyntax(t *testing.T) {
+	for _, token := range []string{"-1", "-0", "+0", "+1", "00", "01", "", "-", "1.0", "99999999999999999999999999999"} {
+		t.Run(token, func(t *testing.T) {
+			ptr, err := Parse("/" + token)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got, err := ptr.Eval([]interface{}{"zero", "one"}); err == nil || got != nil {
+				t.Fatalf("invalid array index %q: got %v, error %v", token, got, err)
+			}
+			// Index syntax restrictions apply only to arrays, not object keys.
+			if got, err := ptr.Eval(map[string]interface{}{token: "value"}); err != nil || got != "value" {
+				t.Fatalf("object key %q: got %v, error %v", token, got, err)
+			}
+		})
+	}
+}
