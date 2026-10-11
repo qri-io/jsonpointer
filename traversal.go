@@ -70,13 +70,15 @@ func walkValue(v reflect.Value, visit func(elem interface{}) error) error {
 		return nil
 	case reflect.Ptr:
 		if !v.IsNil() {
-			walkValue(v.Elem(), visit)
+			return walkValue(v.Elem(), visit)
 		}
 	case reflect.Map:
 		for _, key := range v.MapKeys() {
 			mi := v.MapIndex(key)
 			if mi.CanInterface() {
-				WalkJSON(mi.Interface(), visit)
+				if err := WalkJSON(mi.Interface(), visit); err != nil {
+					return err
+				}
 			}
 		}
 	case reflect.Struct:
@@ -87,12 +89,16 @@ func walkValue(v reflect.Value, visit func(elem interface{}) error) error {
 			f := v.Field(i)
 			// fmt.Printf("%d: %s %s %s = %v\n", i, t.Field(i).Name, f.Type(), t.Field(i).Tag.Get("json"), f.CanInterface())
 			if f.CanInterface() {
-				WalkJSON(f.Interface(), visit)
+				if err := WalkJSON(f.Interface(), visit); err != nil {
+					return err
+				}
 			}
 		}
 	case reflect.Slice, reflect.Array:
 		for i := 0; i < v.Len(); i++ {
-			WalkJSON(v.Index(i).Interface(), visit)
+			if err := WalkJSON(v.Index(i).Interface(), visit); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
