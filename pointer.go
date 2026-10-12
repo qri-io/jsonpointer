@@ -75,6 +75,15 @@ func parse(str string) (Pointer, error) {
 
 	toks := strings.Split(str, separator)
 	for i, t := range toks {
+		for j := 0; j < len(t); j++ {
+			if t[j] != '~' {
+				continue
+			}
+			if j+1 == len(t) || (t[j+1] != '0' && t[j+1] != '1') {
+				return nil, fmt.Errorf("invalid escape in reference token %q", t)
+			}
+			j++
+		}
 		toks[i] = unescapeToken(t)
 	}
 	return Pointer(toks), nil
