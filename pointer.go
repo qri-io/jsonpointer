@@ -60,9 +60,12 @@ func (p Pointer) Tail() Pointer {
 // json-pointer    = *( "/" reference-token )
 // reference-token = *( unescaped / escaped )
 // unescaped       = %x00-2E / %x30-7D / %x7F-10FFFF
-//    ; %x2F ('/') and %x7E ('~') are excluded from 'unescaped'
+//
+//	; %x2F ('/') and %x7E ('~') are excluded from 'unescaped'
+//
 // escaped         = "~" ( "0" / "1" )
-//   ; representing '~' and '/', respectively
+//
+//	; representing '~' and '/', respectively
 func parse(str string) (Pointer, error) {
 	if len(str) == 0 {
 		return Pointer{}, nil
@@ -128,7 +131,10 @@ func (p Pointer) Descendant(path string) (Pointer, error) {
 		return dpath, nil
 	}
 
-	return append(p, dpath...), nil
+	descendant := make(Pointer, len(p)+len(dpath))
+	copy(descendant, p)
+	copy(descendant[len(p):], dpath)
+	return descendant, nil
 }
 
 // RawDescendant extends the pointer with 1 or more path tokens
